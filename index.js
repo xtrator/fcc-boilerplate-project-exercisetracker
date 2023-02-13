@@ -24,6 +24,7 @@ app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({ extended: false }));
 const User = require("./src/models/user");
 const Exercise = require("./src/models/exercise");
+const { json } = require("express");
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
@@ -40,7 +41,8 @@ app.post("/api/users", (req, res) => {
 app.get("/api/users", async (req, res) => {
   try {
     let users = await User.find();
-    res.json(users);
+    res.header("Content-Type", "application/json");
+    res.send(JSON.stringify(users, null, 2));
   } catch (error) {
     res.json({ error: "there has been an error finding users" });
   }
@@ -61,7 +63,6 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
       });
       exercise.save((err, exercise) => {
         if (err == null) {
-          exercise.date = exercise.date.toDateString();
           res.json({
             username: exercise.username,
             description: exercise.description,
@@ -76,6 +77,35 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     }
   } catch (error) {
     res.json({ error: "something wrong happened" });
+  }
+});
+
+// GET /api/users/:_id/logs
+app.get("/api/users/:_id/logs", async (req, res) => {
+  try {
+    let user = await User.findById(req.params._id);
+    let exercises = await Exercise.find({ _user_id: user._id });
+    exercises = exercises.map((e) => {
+      return {
+        description: e.description,
+        duration: e.duration,
+        date: e.date.toDateString(),
+      };
+    });
+    res.header("Content-Type", "application/json");
+    res.send(
+      JSON.stringify(
+        {
+          username: user.username,
+          count: exercises.length,
+          log: exercises,
+        },
+        null,
+        4
+      )
+    );
+  } catch (error) {
+    res.json({ error: "an error has occurred" });
   }
 });
 
