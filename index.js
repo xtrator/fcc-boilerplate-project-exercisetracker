@@ -22,11 +22,10 @@ mongoose
 app.use(cors());
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({ extended: false }));
+const User = require("./src/models/user");
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
-
-const User = require("./src/models/user");
 app.post("/api/users", (req, res) => {
   try {
     let user = new User({ username: req.body.username });
@@ -35,6 +34,14 @@ app.post("/api/users", (req, res) => {
     });
   } catch (error) {
     res.json({ error: "there has been an error" });
+  }
+});
+app.get("/api/users", async (req, res) => {
+  try {
+    let users = await User.find();
+    res.json({ users });
+  } catch (error) {
+    res.json({ error: "there has been an error finding users" });
   }
 });
 
