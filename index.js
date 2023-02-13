@@ -39,7 +39,7 @@ app.post("/api/users", (req, res) => {
 app.get("/api/users", async (req, res) => {
   try {
     let users = await User.find();
-    res.json({ users });
+    res.json(users);
   } catch (error) {
     res.json({ error: "there has been an error finding users" });
   }
