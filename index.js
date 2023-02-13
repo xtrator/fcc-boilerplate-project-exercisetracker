@@ -23,6 +23,7 @@ app.use(cors());
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({ extended: false }));
 const User = require("./src/models/user");
+const Exercise = require("./src/models/exercise");
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
@@ -42,6 +43,39 @@ app.get("/api/users", async (req, res) => {
     res.json(users);
   } catch (error) {
     res.json({ error: "there has been an error finding users" });
+  }
+});
+app.post("/api/users/:_id/exercises", async (req, res) => {
+  try {
+    let user = await User.findOne({ _id: req.params._id });
+
+    if (user) {
+      let dateExists = Date.parse(req.body.date);
+      let date = dateExists ? new Date(req.body.date) : new Date();
+      let exercise = new Exercise({
+        _id: user._id,
+        username: user.username,
+        description: req.body.description,
+        duration: req.body.duration,
+        date: date,
+      });
+      exercise.save((err, exercise) => {
+        if (err == null) {
+          exercise.date = exercise.date.toDateString();
+          res.json({
+            username: exercise.username,
+            description: exercise.description,
+            duration: exercise.duration,
+            date: exercise.date.toDateString(),
+            _id: exercise._id,
+          });
+        }
+      });
+    } else {
+      throw new Error();
+    }
+  } catch (error) {
+    res.json({ error: "something wrong happened" });
   }
 });
 
