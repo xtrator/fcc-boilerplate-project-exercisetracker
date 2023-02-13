@@ -53,7 +53,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
       let dateExists = Date.parse(req.body.date);
       let date = dateExists ? new Date(req.body.date) : new Date();
       let exercise = new Exercise({
-        _id: user._id,
+        _user_id: user._id,
         username: user.username,
         description: req.body.description,
         duration: req.body.duration,
@@ -67,7 +67,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
             description: exercise.description,
             duration: exercise.duration,
             date: exercise.date.toDateString(),
-            _id: exercise._id,
+            _id: exercise._user_id,
           });
         }
       });
