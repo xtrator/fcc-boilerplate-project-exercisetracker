@@ -84,7 +84,20 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
 app.get("/api/users/:_id/logs", async (req, res) => {
   try {
     let user = await User.findById(req.params._id);
-    let exercises = await Exercise.find({ _user_id: user._id });
+    let exercises;
+    if (Date.parse(req.query.from) && Date.parse(req.query.to)) {
+      exercises = await Exercise.find({
+        _user_id: user._id,
+        date: {
+          $gte: req.query.from,
+          $lte: req.query.to,
+        },
+      }).limit(req.query.limit);
+    } else {
+      exercises = await Exercise.find({
+        _user_id: user._id,
+      }).limit(req.query.limit);
+    }
     exercises = exercises.map((e) => {
       return {
         description: e.description,
