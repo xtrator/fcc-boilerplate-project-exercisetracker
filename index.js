@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const bodyParser = require("body-parser");
 require("dotenv").config();
 const mongoose = require("mongoose");
 
@@ -20,8 +21,21 @@ mongoose
 
 app.use(cors());
 app.use(express.static(__dirname + "/public"));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
+});
+
+const User = require("./src/models/user");
+app.post("/api/users", (req, res) => {
+  try {
+    let user = new User({ username: req.body.username });
+    user.save((err, data) => {
+      res.json(user);
+    });
+  } catch (error) {
+    res.json({ error: "there has been an error" });
+  }
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
